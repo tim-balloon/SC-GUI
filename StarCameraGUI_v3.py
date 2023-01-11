@@ -207,6 +207,7 @@ class TelemetryThread(QThread):
         while not self.isInterruptionRequested(): 
             telemetry = listening_final.getStarCamData(self.StarCam_socket)
             if isinstance(telemetry, type(None)):
+                print("Disconnected due to telemetry")
                 self.disconnected.emit(True)
                 break
             # emit this telemetry to the main GUI thread
@@ -215,6 +216,7 @@ class TelemetryThread(QThread):
             # receive and emit image data to the main GUI thread
             image = listening_final.getStarCamImage(self.StarCam_socket) 
             if isinstance(image, type(None)):
+                print("Disconnected due to camera")
                 self.disconnected.emit(True)
                 break
             else:
@@ -670,8 +672,8 @@ class GUI(QDialog):
         top_layout = QVBoxLayout()
 
         # place for entering IP address of Star Camera computer
-        self.ip_input = QLineEdit()
-        self.port_input = QLineEdit()
+        self.ip_input = QLineEdit("127.0.0.1")
+        self.port_input = QLineEdit("8001")
         font = self.ip_input.font()
         font.setPointSize(10)
         self.ip_input.setFont(font)
@@ -940,7 +942,8 @@ class GUI(QDialog):
     """
     def displayTelemetryAndCameraSettings(self, data):
         # unpack the telemetry and camera settings
-        unpacked_data = struct.unpack_from("d d d d d d d d d d d d d ii ii ii ii d d ii ii ii ii ii ii ii fi ii", data)
+        # 8 x used to skip the pointing uncertainty bytes as the GUI is not designed to handle this
+        unpacked_data = struct.unpack_from("d d d d d d d d d d d d d 8x ii ii ii ii d d ii ii ii ii ii ii ii fi ii", data)
 
         # telemetry data parsing (always update for display, no matter what, since user is 
         # not interacting with this panel)
@@ -989,7 +992,7 @@ class GUI(QDialog):
             self.height_box_prev_value = unpacked_data[5]
 
         if (self.prev_timelimit != int(unpacked_data[0])):
-            self.timelimit.setValue(unpacked_data[0])
+            self.timelimit.setValue(int(unpacked_data[0]))
             self.prev_timelimit = unpacked_data[0]
 
         # reset telemetry timing thread/clock

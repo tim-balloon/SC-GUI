@@ -59,13 +59,15 @@ Outputs: Raw, unpacked Star Camera data.
 def getStarCamData(client_socket):
     # number of expected bytes is hard-coded
     try: 
-        (StarCam_data, _) = client_socket.recvfrom(224)   
+        (StarCam_data, _) = client_socket.recvfrom(232)   
         backupStarCamData(StarCam_data)
         print("Received Star Camera data.")
         return StarCam_data
-    except ConnectionResetError:
+    except ConnectionResetError as e:
+        print('getStarCamera handled ConnectionResetError exception:', e)
         return None
-    except struct.error:
+    except struct.error as e:
+        print('getStarCamera handled struct.error exception:', e)
         return None
 
 """
