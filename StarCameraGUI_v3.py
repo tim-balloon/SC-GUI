@@ -1115,7 +1115,7 @@ class GUI(QDialog):
     """
     def updateImageData(self, image_bytes, dtype=np.uint16):
         # convert bytearray to numpy array for manipulation
-        # use frombuffer to support greater images with >8-bit depth
+        # use frombuffer to support images with >8-bit depth
         image_bytes = np.frombuffer(image_bytes, dtype=dtype)
         image_bytes = np.reshape(image_bytes, (CAMERA_HEIGHT, CAMERA_WIDTH))
         # reverse array along vertical direction (flip y coordinates)
