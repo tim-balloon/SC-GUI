@@ -4,6 +4,10 @@ import socket
 import struct
 import os
 
+CAMERA_WIDTH = 1936
+CAMERA_HEIGHT = 1216
+BYTES_PER_PX = 2 # 12-bit capture mode requires 16-bit image transfers
+
 """ 
 Creates and writs information header to the Star Camera data file if it does not already exist. If it does,
 the file already includes a header, so the function just returns in that case.
@@ -59,7 +63,7 @@ Outputs: Raw, unpacked Star Camera data.
 def getStarCamData(client_socket):
     # number of expected bytes is hard-coded
     try: 
-        (StarCam_data, _) = client_socket.recvfrom(232)   
+        (StarCam_data, _) = client_socket.recvfrom(232)
         backupStarCamData(StarCam_data)
         print("Received Star Camera data.")
         return StarCam_data
@@ -78,7 +82,7 @@ Outputs: Raw image bytes.
 def getStarCamImage(client_socket):
     image_bytes = bytearray()
     # image dimensions
-    n = 1936*1216
+    n = CAMERA_WIDTH * CAMERA_HEIGHT * BYTES_PER_PX
     while (len(image_bytes) < n):
         packet = client_socket.recv(n - len(image_bytes)) 
         if not packet:

@@ -1113,9 +1113,10 @@ class GUI(QDialog):
     Inputs: Raw image bytes to display.
     Outputs: None.
     """
-    def updateImageData(self, image_bytes):
+    def updateImageData(self, image_bytes, dtype=np.uint16):
         # convert bytearray to numpy array for manipulation
-        image_bytes = np.array(image_bytes) 
+        # use frombuffer to support images with >8-bit depth
+        image_bytes = np.frombuffer(image_bytes, dtype=dtype)
         image_bytes = np.reshape(image_bytes, (CAMERA_HEIGHT, CAMERA_WIDTH))
         # reverse array along vertical direction (flip y coordinates)
         image_bytes = image_bytes[::-1, ::-1]
