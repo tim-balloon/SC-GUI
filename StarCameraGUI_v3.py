@@ -25,7 +25,7 @@ TIME_LIMIT = 30
 # NOTE(evanmayer): I have extended this past f/2.8 to accommodate the Sigma 85mm
 # f/1.4. In reality, each lens will support slightly different f# choices, but
 # these should be close enough to for the lens to round when given a nearby
-# stop. Also, some lenses stop down as far.
+# stop. Also, some lenses won't stop down as far as this list goes.
 aperture_range = ["1.4", "1.6", "1.8", "2.0", "2.2", "2.5", "2.8", "3.0", "3.3",
                   "3.6", "4.0", "4.3", "4.7", "5.1", "5.6", "6.1", "6.7", "7.3",
                   "8.0", "8.7", "9.5", "10.3", "11.3", "12.3", "13.4", "14.6",
