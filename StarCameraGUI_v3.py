@@ -1409,7 +1409,7 @@ class GUI(QDialog):
         # get blob parameters from GUI
         if self.make_staticHP.isChecked():
             # threshold for pixel value to be a static hot pixel
-            make_HP_bool = 20           
+            make_HP_bool = 150 # yields similar # of hot pixels to iDS' own hot pixel finder
         else:
             make_HP_bool = 0
         
