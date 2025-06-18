@@ -386,11 +386,19 @@ class GUI(QDialog):
 
         # exposure entry field
         self.exposure_box = QLineEdit()
-        self.exposure_box.setToolTip("How the camera will take an image for")
+        self.exposure_box.setToolTip("How long the camera will take an image for")
         self.exposure_box.setMaxLength(9)
-        self.exposure_box.setText("800")
+        self.exposure_box.setText("100")
         self.exposure_box_prev_value = float(self.exposure_box.text())
         cmd_layout.addRow(QLabel("Exposure time in milliseconds:"), self.exposure_box)
+
+        # gain entry field
+        self.gain_box = QLineEdit()
+        self.gain_box.setToolTip("Analog CMOS amplifier gain factor (x times base gain ADU/e-)")
+        self.gain_box.setMaxLength(9)
+        self.gain_box.setText("1.0")
+        self.gain_prev_value = float(self.gain_box.text())
+        cmd_layout.addRow(QLabel("Sensor Gain (x times base gain):"), self.gain_box)
 
         # timeout for solving Astrometry
         self.timelimit = QSpinBox()
@@ -949,13 +957,6 @@ class GUI(QDialog):
     """
     def displayTelemetryAndCameraSettings(self, data):
         # unpack the telemetry and camera settings
-        # NOTE(evanmayer): Testing SC code on Ubuntu 24.04 seems to have shifted
-        # the byte packing. pragma is used to align struct packing on 1-byte
-        # boundaries, as before, but not 256 bytes are being transmitted, not
-        # 232 as before. Perhaps a latent bug where SC code had 3 double fields
-        # added to astrometry struct and we did not keep pace, but it worked for
-        # a while?
-        # The new struct formats in listening_final seem to fix this.
         fmt = (
             listening_final.ASTROMETRY_STRUCT_FMT +
             listening_final.CAMERA_PARAMS_STRUCT_FMT +
@@ -973,11 +974,11 @@ class GUI(QDialog):
         self.alt_box.setText(str(unpacked_data[11]))
         self.ir_box.setText(str(unpacked_data[10]))
         self.ps_box.setText(str(unpacked_data[9]))
-        self.auto_focus_state = unpacked_data[24]
+        self.auto_focus_state = unpacked_data[26]
         # only add to auto-focusing data if we are in an auto-focusing process
         if (unpacked_data[24]) and (self.focus_slider.previous_value != unpacked_data[14]):
             self.auto_focus.append(unpacked_data[14])
-            self.flux.append(unpacked_data[29])
+            self.flux.append(unpacked_data[31])
         # if every single telemetry data point is 0, esp. pixel scale, that is before first solution of the run
         # (i.e. when camera is running for first time and auto-focusing by default)
         elif (unpacked_data[6] != 0 and unpacked_data[7] != 0 and unpacked_data[8] != 0 and unpacked_data[9] != 0 and
@@ -1028,28 +1029,28 @@ class GUI(QDialog):
             self.focus_slider.setValue(unpacked_data[14])
             self.focus_slider.updatePrevValue()
 
-        if (self.prev_auto_focus != unpacked_data[24]):
-            self.prev_auto_focus = unpacked_data[24]
-            if (unpacked_data[24] == 1):
+        if (self.prev_auto_focus != unpacked_data[26]):
+            self.prev_auto_focus = unpacked_data[26]
+            if (unpacked_data[26] == 1):
                 self.auto_focus_box.setChecked(True)
             else:
                 self.auto_focus_box.setChecked(False)
 
-        if (self.prev_start_focus != unpacked_data[25]):
-            self.prev_start_focus = unpacked_data[25]
-            self.start_focus_pos.setValue(unpacked_data[25])
+        if (self.prev_start_focus != unpacked_data[27]):
+            self.prev_start_focus = unpacked_data[27]
+            self.start_focus_pos.setValue(unpacked_data[27])
 
-        if (self.prev_end_focus != unpacked_data[26]):
-            self.prev_end_focus = unpacked_data[26]
-            self.end_focus_pos.setValue(unpacked_data[26])
+        if (self.prev_end_focus != unpacked_data[28]):
+            self.prev_end_focus = unpacked_data[28]
+            self.end_focus_pos.setValue(unpacked_data[28])
 
-        if (self.prev_focus_step != unpacked_data[27]):
-            self.prev_focus_step = unpacked_data[27]
-            self.focus_step.setValue(unpacked_data[27])
+        if (self.prev_focus_step != unpacked_data[29]):
+            self.prev_focus_step = unpacked_data[29]
+            self.focus_step.setValue(unpacked_data[29])
 
-        if (self.prev_photos_per_focus != unpacked_data[28]):
-            self.prev_photos_per_focus = unpacked_data[28]
-            self.photos_per_focus.setValue(unpacked_data[28])
+        if (self.prev_photos_per_focus != unpacked_data[30]):
+            self.prev_photos_per_focus = unpacked_data[30]
+            self.photos_per_focus.setValue(unpacked_data[30])
 
         if (self.infinity_focus_box_prev_value != unpacked_data[15]):
             self.infinity_focus_box_prev_value = unpacked_data[15]
@@ -1073,58 +1074,62 @@ class GUI(QDialog):
             self.exposure_box.setText(str(unpacked_data[21]))
             self.exposure_box_prev_value = unpacked_data[21]
 
-        if (self.prev_spike_limit != unpacked_data[30]):
-            self.new_spike_limit.setText(str(unpacked_data[30]))
-            self.prev_spike_limit = unpacked_data[30]
+        if (self.gain_box_prev_value != unpacked_data[23]):
+            self.gain_box.setText(str(unpacked_data[23]))
+            self.gain_box_prev_value = unpacked_data[23]
 
-        if (self.prev_dynamic_hot_pixels != unpacked_data[31]):
-            self.prev_dynamic_hot_pixels = unpacked_data[31]
-            if (unpacked_data[31] == 1):
+        if (self.prev_spike_limit != unpacked_data[32]):
+            self.new_spike_limit.setText(str(unpacked_data[32]))
+            self.prev_spike_limit = unpacked_data[32]
+
+        if (self.prev_dynamic_hot_pixels != unpacked_data[33]):
+            self.prev_dynamic_hot_pixels = unpacked_data[33]
+            if (unpacked_data[33] == 1):
                 self.new_dynamic_hot_pixels.setCurrentText("On")
             else:
                 self.new_dynamic_hot_pixels.setCurrentText("Off")
 
-        if (self.prev_r_smooth != unpacked_data[32]):
-            self.new_r_smooth.setText(str(unpacked_data[32]))
-            self.prev_r_smooth = unpacked_data[32]
+        if (self.prev_r_smooth != unpacked_data[34]):
+            self.new_r_smooth.setText(str(unpacked_data[34]))
+            self.prev_r_smooth = unpacked_data[34]
 
-        if (self.prev_high_pass_filter != unpacked_data[33]):
-            self.prev_high_pass_filter = unpacked_data[33]
-            if (unpacked_data[33] == 1):
+        if (self.prev_high_pass_filter != unpacked_data[35]):
+            self.prev_high_pass_filter = unpacked_data[35]
+            if (unpacked_data[35] == 1):
                 self.new_high_pass_filter.setCurrentText("On")
             else:
                 self.new_high_pass_filter.setCurrentText("Off")
 
-        if (self.prev_r_high_pass_filter != unpacked_data[34]):
-            self.new_r_high_pass_filter.setText(str(unpacked_data[34]))
-            self.prev_r_high_pass_filter = unpacked_data[34]
+        if (self.prev_r_high_pass_filter != unpacked_data[36]):
+            self.new_r_high_pass_filter.setText(str(unpacked_data[36]))
+            self.prev_r_high_pass_filter = unpacked_data[36]
 
-        if (self.prev_centroid_value != unpacked_data[35]):
-            self.new_centroid_search_border.setText(str(unpacked_data[35]))
-            self.prev_centroid_value = unpacked_data[35]
+        if (self.prev_centroid_value != unpacked_data[37]):
+            self.new_centroid_search_border.setText(str(unpacked_data[37]))
+            self.prev_centroid_value = unpacked_data[37]
 
-        if (self.prev_filter_return_image != unpacked_data[36]):
-            self.prev_filter_return_image = unpacked_data[36]
-            if (unpacked_data[36] == 1):
+        if (self.prev_filter_return_image != unpacked_data[38]):
+            self.prev_filter_return_image = unpacked_data[38]
+            if (unpacked_data[38] == 1):
                 self.new_filter_return_image.setCurrentText("True")
             else:
                 self.new_filter_return_image.setCurrentText("False")
         
-        if (self.prev_n_sigma != unpacked_data[37]):
-            self.new_n_sigma.setText(str(unpacked_data[37]))
-            self.prev_n_sigma = unpacked_data[37]
+        if (self.prev_n_sigma != unpacked_data[39]):
+            self.new_n_sigma.setText(str(unpacked_data[39]))
+            self.prev_n_sigma = unpacked_data[39]
 
-        if (self.prev_unique_star_spacing != unpacked_data[38]):
-            self.new_unique_star_spacing.setText(str(unpacked_data[38]))
-            self.prev_unique_star_spacing = unpacked_data[38]
+        if (self.prev_unique_star_spacing != unpacked_data[40]):
+            self.new_unique_star_spacing.setText(str(unpacked_data[40]))
+            self.prev_unique_star_spacing = unpacked_data[40]
 
-        if (self.prev_makeHP != bool(unpacked_data[39])):
-            self.make_staticHP.setChecked(bool(unpacked_data[39]))
-            self.prev_makeHP = unpacked_data[39]
+        if (self.prev_makeHP != bool(unpacked_data[41])):
+            self.make_staticHP.setChecked(bool(unpacked_data[41]))
+            self.prev_makeHP = unpacked_data[41]
 
-        if (self.prev_useHP != bool(unpacked_data[40])):
-            self.use_staticHP.setChecked(bool(unpacked_data[40]))
-            self.prev_useHP = unpacked_data[40]
+        if (self.prev_useHP != bool(unpacked_data[42])):
+            self.use_staticHP.setChecked(bool(unpacked_data[42]))
+            self.prev_useHP = unpacked_data[42]
 
     """ 
     Update StarCamera image data. 
@@ -1246,6 +1251,8 @@ class GUI(QDialog):
         if command_name == "longitude":
             QMessageBox().critical(self, "Command Error", "Invalid longitude", QMessageBox.Ok)
         
+        # TODO: FIXME: if someone tried to use this GUI via SSH +X forwarding
+        # on a ballon, it would not work
         if command_name == "height":
             if command_value > 8850:
                 msg = "You're above the highest point on Earth! Get down from there!"
@@ -1475,7 +1482,7 @@ class GUI(QDialog):
             star_spacing_value = -1
 
         # package commands to send to camera
-        cmds_for_camera = struct.pack('ddddddfiiiiiiiiiifffffffff', logodds, latitude, longitude, height, exposure, 
+        cmds_for_camera = struct.pack('dddddddfiiiiiiiiiifffffffff', logodds, latitude, longitude, height, exposure, gain,
                                        timelimit, set_focus_to_amount, auto_focus_bool, start_focus, end_focus, 
                                        step_size, photos_per_focus, infinity_focus_bool, set_aperture_steps, 
                                        max_aperture_bool, make_HP_bool, use_HP_bool, spike_limit_value, 
