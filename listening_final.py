@@ -12,7 +12,7 @@ BYTES_PER_PX = 2 # 12-bit capture mode requires 16-bit image transfers
 
 # 8 x used to skip the pointing uncertainty bytes as the GUI is not designed to handle this
 ASTROMETRY_STRUCT_FMT = "d d d d d d d d d d d d d " + "8x 8x 8x 8x "
-CAMERA_PARAMS_STRUCT_FMT = "i i i i i i i i d d i i i i i i i "
+CAMERA_PARAMS_STRUCT_FMT = "i i i i i i i i d d i i i i i i d "
 BLOB_PARAMS_STRUCT_FMT = "i i i i i i i f i i i"
 STARCAM_DATA_SIZE_BYTES = struct.calcsize(ASTROMETRY_STRUCT_FMT + CAMERA_PARAMS_STRUCT_FMT + BLOB_PARAMS_STRUCT_FMT)
 

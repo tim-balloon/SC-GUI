@@ -786,8 +786,8 @@ class GUI(QDialog):
             self.ir_graph_widget.setLabel("left", "IR [deg]", **label_style)
             self.ir_graph_widget.setLabel("right", "IR [deg]", **label_style)
             self.ir_graph_widget.setLabel("bottom", "Raw time [seconds]", **label_style)
-            self.af_graph_widget.setLabel("left", "Flux [raw pixel value]", **label_style)
-            self.af_graph_widget.setLabel("right", "Flux [raw pixel value]", **label_style)
+            self.af_graph_widget.setLabel("left", "Flux [sharpness metric]", **label_style)
+            self.af_graph_widget.setLabel("right", "Flux [sharpness metric]", **label_style)
             self.af_graph_widget.setLabel("bottom", "Focus position [encoder counts]", **label_style)
             # create a reference to the line of each graph for updating telemetry as it arrives
             pen = pg.mkPen(color = "#524f4f", width = 3)
@@ -866,8 +866,8 @@ class GUI(QDialog):
             self.ir_graph_widget.setLabel("left", "IR [deg]", **label_style)
             self.ir_graph_widget.setLabel("right", "IR [deg]", **label_style)
             self.ir_graph_widget.setLabel("bottom", "Raw time [seconds]", **label_style)
-            self.af_graph_widget.setLabel("left", "Flux [raw pixel value]", **label_style)
-            self.af_graph_widget.setLabel("right", "Flux [raw pixel value]", **label_style)
+            self.af_graph_widget.setLabel("left", "Flux [sharpness metric]", **label_style)
+            self.af_graph_widget.setLabel("right", "Flux [sharpness metric]", **label_style)
             self.af_graph_widget.setLabel("bottom", "Focus position [encoder counts]", **label_style)
             # create a reference to the line of each graph for updating telemetry as it arrives
             pen = pg.mkPen(color = "w", width = 3)
