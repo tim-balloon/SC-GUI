@@ -11,18 +11,25 @@ import listening_final
 import ipaddress
 from pyqtgraph import PlotWidget, plot
 import pyqtgraph as pg
-import pyqtgraph.ptime as ptime
 
 # path
 script_dir = os.path.dirname(os.path.realpath(__file__))
 # camera image dimensions in pixels
-CAMERA_WIDTH = 1936 
-CAMERA_HEIGHT = 1216
+#CAMERA_WIDTH = 1936
+CAMERA_WIDTH = 5320
+#CAMERA_HEIGHT = 1216
+CAMERA_HEIGHT = 3032
 # time limit for progress bar of telemetry-timing thread
 TIME_LIMIT = 30 
 # possible aperture values on Star Camera (Canon EF f/2.8)
-aperture_range = ["2.8", "3.0", "3.3", "3.6", "4.0", "4.3", "4.7", "5.1", "5.6", "6.1", "6.7", "7.3", "8.0", "8.7", 
-                  "9.5", "10.3", "11.3", "12.3", "13.4", "14.6", "16.0", "17.4", "19.0", "20.7", "22.6", "24.6", "26.9",
+# NOTE(evanmayer): I have extended this past f/2.8 to accommodate the Sigma 85mm
+# f/1.4. In reality, each lens will support slightly different f# choices, but
+# these should be close enough to for the lens to round when given a nearby
+# stop. Also, some lenses won't stop down as far as this list goes.
+aperture_range = ["1.4", "1.6", "1.8", "2.0", "2.2", "2.5", "2.8", "3.0", "3.3",
+                  "3.6", "4.0", "4.3", "4.7", "5.1", "5.6", "6.1", "6.7", "7.3",
+                  "8.0", "8.7", "9.5", "10.3", "11.3", "12.3", "13.4", "14.6",
+                  "16.0", "17.4", "19.0", "20.7", "22.6", "24.6", "26.9",
                   "29.3", "32.0"]
 
 """
@@ -942,8 +949,19 @@ class GUI(QDialog):
     """
     def displayTelemetryAndCameraSettings(self, data):
         # unpack the telemetry and camera settings
-        # 8 x used to skip the pointing uncertainty bytes as the GUI is not designed to handle this
-        unpacked_data = struct.unpack_from("d d d d d d d d d d d d d 8x ii ii ii ii d d ii ii ii ii ii ii ii fi ii", data)
+        # NOTE(evanmayer): Testing SC code on Ubuntu 24.04 seems to have shifted
+        # the byte packing. pragma is used to align struct packing on 1-byte
+        # boundaries, as before, but not 256 bytes are being transmitted, not
+        # 232 as before. Perhaps a latent bug where SC code had 3 double fields
+        # added to astrometry struct and we did not keep pace, but it worked for
+        # a while?
+        # The new struct formats in listening_final seem to fix this.
+        fmt = (
+            listening_final.ASTROMETRY_STRUCT_FMT +
+            listening_final.CAMERA_PARAMS_STRUCT_FMT +
+            listening_final.BLOB_PARAMS_STRUCT_FMT
+        )
+        unpacked_data = struct.unpack_from(fmt, data)
 
         # telemetry data parsing (always update for display, no matter what, since user is 
         # not interacting with this panel)
