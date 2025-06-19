@@ -397,7 +397,7 @@ class GUI(QDialog):
         self.gain_box.setToolTip("Analog CMOS amplifier gain factor (x times base gain ADU/e-)")
         self.gain_box.setMaxLength(9)
         self.gain_box.setText("1.0")
-        self.gain_prev_value = float(self.gain_box.text())
+        self.gain_box_prev_value = float(self.gain_box.text())
         cmd_layout.addRow(QLabel("Sensor Gain (x times base gain):"), self.gain_box)
 
         # timeout for solving Astrometry
@@ -976,7 +976,7 @@ class GUI(QDialog):
         self.ps_box.setText(str(unpacked_data[9]))
         self.auto_focus_state = unpacked_data[26]
         # only add to auto-focusing data if we are in an auto-focusing process
-        if (unpacked_data[24]) and (self.focus_slider.previous_value != unpacked_data[14]):
+        if (unpacked_data[26]) and (self.focus_slider.previous_value != unpacked_data[14]):
             self.auto_focus.append(unpacked_data[14])
             self.flux.append(unpacked_data[31])
         # if every single telemetry data point is 0, esp. pixel scale, that is before first solution of the run
@@ -1355,6 +1355,10 @@ class GUI(QDialog):
             if not still_send:
                 self.exposure_box.setText(str(self.exposure_box_prev_value))
                 return
+            
+        # gain parameter
+        # error checking handled on camera side
+        gain = float(self.gain_box.text())
 
         # Astrometry solving timeout
         timelimit = int(self.timelimit.value())
