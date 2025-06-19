@@ -18,7 +18,6 @@ ASTROMETRY_STRUCT_FMT = "<d d d d d d d d d d d d d 8x 8x 8x 8x"
 CAMERA_PARAMS_STRUCT_FMT = "i i i i i i i i d i d i i i i i i i d"
 BLOB_PARAMS_STRUCT_FMT = "i i i i i i i f i i i"
 STARCAM_DATA_SIZE_BYTES = struct.calcsize(ASTROMETRY_STRUCT_FMT + CAMERA_PARAMS_STRUCT_FMT + BLOB_PARAMS_STRUCT_FMT)
-print(STARCAM_DATA_SIZE_BYTES)
 
 """ 
 Creates and writs information header to the Star Camera data file if it does not already exist. If it does,
