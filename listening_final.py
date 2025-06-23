@@ -11,8 +11,11 @@ CAMERA_HEIGHT = 3032
 BYTES_PER_PX = 2 # 12-bit capture mode requires 16-bit image transfers
 
 # 8 x used to skip the pointing uncertainty bytes as the GUI is not designed to handle this
-ASTROMETRY_STRUCT_FMT = "d d d d d d d d d d d d d " + "8x 8x 8x 8x "
-CAMERA_PARAMS_STRUCT_FMT = "i i i i i i i i d d i i i i i i i "
+# we must use something like =, <, > at the beginning, otherwise the calculated size to
+# unpack will vary according to the number and order of bytes to unpack:
+# https://stackoverflow.com/a/12134822
+ASTROMETRY_STRUCT_FMT = "<d d d d d d d d d d d d d 8x 8x 8x 8x"
+CAMERA_PARAMS_STRUCT_FMT = "i i i i i i i i d i d i i i i i i i d"
 BLOB_PARAMS_STRUCT_FMT = "i i i i i i i f i i i"
 STARCAM_DATA_SIZE_BYTES = struct.calcsize(ASTROMETRY_STRUCT_FMT + CAMERA_PARAMS_STRUCT_FMT + BLOB_PARAMS_STRUCT_FMT)
 
@@ -46,7 +49,6 @@ def backupStarCamData(StarCam_data):
         CAMERA_PARAMS_STRUCT_FMT +
         BLOB_PARAMS_STRUCT_FMT
     )
-    # unpacked_data = struct.unpack_from("dddddddddddddiiiiiiiiddiiiiiiiiiiiiiifiii", StarCam_data)
     unpacked_data = struct.unpack_from(fmt, StarCam_data)
     text = ["%s," % str(unpacked_data[1]), "%s," % str(time.asctime(time.gmtime(unpacked_data[1]))), 
             "%s," % str(unpacked_data[6]), "%s," % str(unpacked_data[7]), "%s," % str(unpacked_data[8]), 
