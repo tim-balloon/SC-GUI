@@ -312,6 +312,9 @@ class GUI(QDialog):
         self.time_box = QLabel()
         self.time_box.setToolTip("The timestamp corresponding to the most recent image and Astrometry solution")
         telemetry_layout.addRow(QLabel("Greenwich Mean Time (GMT):"), self.time_box)
+        self.num_blobs_box = QLabel()
+        self.num_blobs_box.setToolTip("Number of blobs found before limiting and sending to astrometry")
+        telemetry_layout.addRow(QLabel("Number of blobs:"), self.num_blobs_box)
         self.ra_box = QLabel()
         self.ra_box.setToolTip("Observed right ascension (degrees)")
         telemetry_layout.addRow(QLabel("RA [deg]:"), self.ra_box)
@@ -967,48 +970,49 @@ class GUI(QDialog):
         # telemetry data parsing (always update for display, no matter what, since user is 
         # not interacting with this panel)
         self.time_box.setText(time.asctime(time.gmtime(unpacked_data[1])))
-        self.ra_box.setText(str(unpacked_data[6]))
-        self.dec_box.setText(str(unpacked_data[7]))
-        self.fr_box.setText(str(unpacked_data[8]))
-        self.az_box.setText(str(unpacked_data[12]))
-        self.alt_box.setText(str(unpacked_data[11]))
-        self.ir_box.setText(str(unpacked_data[10]))
-        self.ps_box.setText(str(unpacked_data[9]))
-        self.auto_focus_state = unpacked_data[26]
+        self.ra_box.setText(str(unpacked_data[7]))
+        self.dec_box.setText(str(unpacked_data[8]))
+        self.fr_box.setText(str(unpacked_data[9]))
+        self.az_box.setText(str(unpacked_data[13]))
+        self.alt_box.setText(str(unpacked_data[12]))
+        self.ir_box.setText(str(unpacked_data[11]))
+        self.ps_box.setText(str(unpacked_data[10]))
+        self.num_blobs_box.setText(str(unpacked_data[2]))
+        self.auto_focus_state = unpacked_data[27]
         # only add to auto-focusing data if we are in an auto-focusing process
-        if (unpacked_data[26]) and (self.focus_slider.previous_value != unpacked_data[14]):
-            self.auto_focus.append(unpacked_data[14])
-            self.flux.append(unpacked_data[31])
+        if (unpacked_data[27]) and (self.focus_slider.previous_value != unpacked_data[15]):
+            self.auto_focus.append(unpacked_data[15])
+            self.flux.append(unpacked_data[32])
         # if every single telemetry data point is 0, esp. pixel scale, that is before first solution of the run
         # (i.e. when camera is running for first time and auto-focusing by default)
-        elif (unpacked_data[6] != 0 and unpacked_data[7] != 0 and unpacked_data[8] != 0 and unpacked_data[9] != 0 and
-              unpacked_data[10] != 0 and unpacked_data[11] != 0 and unpacked_data[12] != 0):
+        elif (unpacked_data[7] != 0 and unpacked_data[8] != 0 and unpacked_data[9] != 0 and unpacked_data[10] != 0 and
+              unpacked_data[11] != 0 and unpacked_data[12] != 0 and unpacked_data[13] != 0):
             self.time.append(unpacked_data[1])
-            self.ra.append(unpacked_data[6])
-            self.dec.append(unpacked_data[7])
-            self.fr.append(unpacked_data[8])
-            self.az.append(unpacked_data[12])
-            self.alt.append(unpacked_data[11])
-            self.ir.append(unpacked_data[10])
-            self.ps.append(unpacked_data[9])
+            self.ra.append(unpacked_data[7])
+            self.dec.append(unpacked_data[8])
+            self.fr.append(unpacked_data[9])
+            self.az.append(unpacked_data[13])
+            self.alt.append(unpacked_data[12])
+            self.ir.append(unpacked_data[11])
+            self.ps.append(unpacked_data[10])
 
         # if newly received logodds value is different from previous value, update logodds field
         # (and do the same for all following fields for camera settings)
-        if (self.prev_logodds != unpacked_data[2]):
-            self.logodds.setText("{:.2e}".format(unpacked_data[2]))
-            self.prev_logodds = unpacked_data[2]
+        if (self.prev_logodds != unpacked_data[3]):
+            self.logodds.setText("{:.2e}".format(unpacked_data[3]))
+            self.prev_logodds = unpacked_data[3]
 
-        if (self.latitude_box_prev_value != unpacked_data[3]):
-            self.latitude_box.setText(str(unpacked_data[3]))
-            self.latitude_box_prev_value = unpacked_data[3]
+        if (self.latitude_box_prev_value != unpacked_data[4]):
+            self.latitude_box.setText(str(unpacked_data[4]))
+            self.latitude_box_prev_value = unpacked_data[4]
 
-        if (self.longitude_box_prev_value != unpacked_data[4]):
-            self.longitude_box.setText(str(unpacked_data[4]))
-            self.longitude_box_prev_value = unpacked_data[4]
+        if (self.longitude_box_prev_value != unpacked_data[5]):
+            self.longitude_box.setText(str(unpacked_data[5]))
+            self.longitude_box_prev_value = unpacked_data[5]
 
-        if (self.height_box_prev_value != unpacked_data[5]):
-            self.height_box.setText(str(unpacked_data[5]))
-            self.height_box_prev_value = unpacked_data[5]
+        if (self.height_box_prev_value != unpacked_data[6]):
+            self.height_box.setText(str(unpacked_data[6]))
+            self.height_box_prev_value = unpacked_data[6]
 
         if (self.prev_timelimit != int(unpacked_data[0])):
             self.timelimit.setValue(int(unpacked_data[0]))
@@ -1020,116 +1024,116 @@ class GUI(QDialog):
         self.progress_bar_label.setText("Waiting %.0f seconds for telemetry:" % 0)
 
         # display new focus information on commanding window
-        self.focus_slider.setMinimum(unpacked_data[18])
-        self.focus_slider.setMaximum(unpacked_data[19])
-        self.start_focus_pos.setRange(unpacked_data[18] + 25, unpacked_data[19] - 25)
-        self.end_focus_pos.setRange(unpacked_data[18] + 25, unpacked_data[19] - 25)
+        self.focus_slider.setMinimum(unpacked_data[19])
+        self.focus_slider.setMaximum(unpacked_data[20])
+        self.start_focus_pos.setRange(unpacked_data[19] + 25, unpacked_data[20] - 25)
+        self.end_focus_pos.setRange(unpacked_data[19] + 25, unpacked_data[20] - 25)
 
-        if (self.focus_slider.previous_value != unpacked_data[14]):
-            self.focus_slider.setValue(unpacked_data[14])
+        if (self.focus_slider.previous_value != unpacked_data[15]):
+            self.focus_slider.setValue(unpacked_data[15])
             self.focus_slider.updatePrevValue()
 
-        if (self.prev_auto_focus != unpacked_data[26]):
-            self.prev_auto_focus = unpacked_data[26]
-            if (unpacked_data[26] == 1):
+        if (self.prev_auto_focus != unpacked_data[27]):
+            self.prev_auto_focus = unpacked_data[27]
+            if (unpacked_data[27] == 1):
                 self.auto_focus_box.setChecked(True)
             else:
                 self.auto_focus_box.setChecked(False)
 
-        if (self.prev_start_focus != unpacked_data[27]):
-            self.prev_start_focus = unpacked_data[27]
-            self.start_focus_pos.setValue(unpacked_data[27])
+        if (self.prev_start_focus != unpacked_data[28]):
+            self.prev_start_focus = unpacked_data[28]
+            self.start_focus_pos.setValue(unpacked_data[28])
 
-        if (self.prev_end_focus != unpacked_data[28]):
-            self.prev_end_focus = unpacked_data[28]
-            self.end_focus_pos.setValue(unpacked_data[28])
+        if (self.prev_end_focus != unpacked_data[29]):
+            self.prev_end_focus = unpacked_data[29]
+            self.end_focus_pos.setValue(unpacked_data[29])
 
-        if (self.prev_focus_step != unpacked_data[29]):
-            self.prev_focus_step = unpacked_data[29]
-            self.focus_step.setValue(unpacked_data[29])
+        if (self.prev_focus_step != unpacked_data[30]):
+            self.prev_focus_step = unpacked_data[30]
+            self.focus_step.setValue(unpacked_data[30])
 
-        if (self.prev_photos_per_focus != unpacked_data[30]):
-            self.prev_photos_per_focus = unpacked_data[30]
-            self.photos_per_focus.setValue(unpacked_data[30])
+        if (self.prev_photos_per_focus != unpacked_data[31]):
+            self.prev_photos_per_focus = unpacked_data[31]
+            self.photos_per_focus.setValue(unpacked_data[31])
 
-        if (self.infinity_focus_box_prev_value != unpacked_data[15]):
-            self.infinity_focus_box_prev_value = unpacked_data[15]
-            if (unpacked_data[15] == 1):
+        if (self.infinity_focus_box_prev_value != unpacked_data[16]):
+            self.infinity_focus_box_prev_value = unpacked_data[16]
+            if (unpacked_data[16] == 1):
                 self.infinity_focus_box.setCurrentText("True")
             else:
                 self.infinity_focus_box.setCurrentText("False")
 
-        if (self.aperture_menu.previous_value != str(unpacked_data[20]/10)):
-            self.aperture_menu.setCurrentText(str(unpacked_data[20]/10))
+        if (self.aperture_menu.previous_value != str(unpacked_data[21]/10)):
+            self.aperture_menu.setCurrentText(str(unpacked_data[21]/10))
             self.aperture_menu.updatePrevValue()
 
-        if (self.max_aperture_box_prev_value != unpacked_data[17]):
-            self.max_aperture_box_prev_value = unpacked_data[17]
-            if (unpacked_data[17] == 1):
+        if (self.max_aperture_box_prev_value != unpacked_data[18]):
+            self.max_aperture_box_prev_value = unpacked_data[18]
+            if (unpacked_data[18] == 1):
                 self.max_aperture_box.setCurrentText("True")
             else:
                 self.max_aperture_box.setCurrentText("False")
 
-        if (self.exposure_box_prev_value != unpacked_data[21]):
-            self.exposure_box.setText(str(unpacked_data[21]))
-            self.exposure_box_prev_value = unpacked_data[21]
+        if (self.exposure_box_prev_value != unpacked_data[22]):
+            self.exposure_box.setText(str(unpacked_data[22]))
+            self.exposure_box_prev_value = unpacked_data[22]
 
-        if (self.gain_box_prev_value != unpacked_data[23]):
-            self.gain_box.setText(str(unpacked_data[23]))
-            self.gain_box_prev_value = unpacked_data[23]
+        if (self.gain_box_prev_value != unpacked_data[24]):
+            self.gain_box.setText(str(unpacked_data[24]))
+            self.gain_box_prev_value = unpacked_data[24]
 
-        if (self.prev_spike_limit != unpacked_data[32]):
-            self.new_spike_limit.setText(str(unpacked_data[32]))
-            self.prev_spike_limit = unpacked_data[32]
+        if (self.prev_spike_limit != unpacked_data[33]):
+            self.new_spike_limit.setText(str(unpacked_data[33]))
+            self.prev_spike_limit = unpacked_data[33]
 
-        if (self.prev_dynamic_hot_pixels != unpacked_data[33]):
-            self.prev_dynamic_hot_pixels = unpacked_data[33]
-            if (unpacked_data[33] == 1):
+        if (self.prev_dynamic_hot_pixels != unpacked_data[34]):
+            self.prev_dynamic_hot_pixels = unpacked_data[34]
+            if (unpacked_data[34] == 1):
                 self.new_dynamic_hot_pixels.setCurrentText("On")
             else:
                 self.new_dynamic_hot_pixels.setCurrentText("Off")
 
-        if (self.prev_r_smooth != unpacked_data[34]):
-            self.new_r_smooth.setText(str(unpacked_data[34]))
-            self.prev_r_smooth = unpacked_data[34]
+        if (self.prev_r_smooth != unpacked_data[35]):
+            self.new_r_smooth.setText(str(unpacked_data[35]))
+            self.prev_r_smooth = unpacked_data[35]
 
-        if (self.prev_high_pass_filter != unpacked_data[35]):
-            self.prev_high_pass_filter = unpacked_data[35]
-            if (unpacked_data[35] == 1):
+        if (self.prev_high_pass_filter != unpacked_data[36]):
+            self.prev_high_pass_filter = unpacked_data[36]
+            if (unpacked_data[36] == 1):
                 self.new_high_pass_filter.setCurrentText("On")
             else:
                 self.new_high_pass_filter.setCurrentText("Off")
 
-        if (self.prev_r_high_pass_filter != unpacked_data[36]):
-            self.new_r_high_pass_filter.setText(str(unpacked_data[36]))
-            self.prev_r_high_pass_filter = unpacked_data[36]
+        if (self.prev_r_high_pass_filter != unpacked_data[37]):
+            self.new_r_high_pass_filter.setText(str(unpacked_data[37]))
+            self.prev_r_high_pass_filter = unpacked_data[37]
 
-        if (self.prev_centroid_value != unpacked_data[37]):
-            self.new_centroid_search_border.setText(str(unpacked_data[37]))
-            self.prev_centroid_value = unpacked_data[37]
+        if (self.prev_centroid_value != unpacked_data[38]):
+            self.new_centroid_search_border.setText(str(unpacked_data[38]))
+            self.prev_centroid_value = unpacked_data[38]
 
-        if (self.prev_filter_return_image != unpacked_data[38]):
-            self.prev_filter_return_image = unpacked_data[38]
-            if (unpacked_data[38] == 1):
+        if (self.prev_filter_return_image != unpacked_data[39]):
+            self.prev_filter_return_image = unpacked_data[39]
+            if (unpacked_data[39] == 1):
                 self.new_filter_return_image.setCurrentText("True")
             else:
                 self.new_filter_return_image.setCurrentText("False")
         
-        if (self.prev_n_sigma != unpacked_data[39]):
-            self.new_n_sigma.setText(str(unpacked_data[39]))
-            self.prev_n_sigma = unpacked_data[39]
+        if (self.prev_n_sigma != unpacked_data[40]):
+            self.new_n_sigma.setText(str(unpacked_data[40]))
+            self.prev_n_sigma = unpacked_data[40]
 
-        if (self.prev_unique_star_spacing != unpacked_data[40]):
-            self.new_unique_star_spacing.setText(str(unpacked_data[40]))
-            self.prev_unique_star_spacing = unpacked_data[40]
+        if (self.prev_unique_star_spacing != unpacked_data[41]):
+            self.new_unique_star_spacing.setText(str(unpacked_data[41]))
+            self.prev_unique_star_spacing = unpacked_data[41]
 
-        if (self.prev_makeHP != bool(unpacked_data[41])):
-            self.make_staticHP.setChecked(bool(unpacked_data[41]))
-            self.prev_makeHP = unpacked_data[41]
+        if (self.prev_makeHP != bool(unpacked_data[42])):
+            self.make_staticHP.setChecked(bool(unpacked_data[42]))
+            self.prev_makeHP = unpacked_data[42]
 
-        if (self.prev_useHP != bool(unpacked_data[42])):
-            self.use_staticHP.setChecked(bool(unpacked_data[42]))
-            self.prev_useHP = unpacked_data[42]
+        if (self.prev_useHP != bool(unpacked_data[43])):
+            self.use_staticHP.setChecked(bool(unpacked_data[43]))
+            self.prev_useHP = unpacked_data[43]
 
     """ 
     Update StarCamera image data. 
